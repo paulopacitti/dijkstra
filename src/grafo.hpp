@@ -1,5 +1,7 @@
 #ifndef GRAFO_HPP
 #define GRAFO_HPP
+
+#include <list>
 using namespace std;
 
 class Grafo {
@@ -13,5 +15,4 @@ class Grafo {
 		Grafo(int V, int M, int W);
 		void adicionarAresta(int v1, int v2, int cust);
 };
-
 #endif

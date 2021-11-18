@@ -49,22 +49,26 @@ Grafo criarGrafo(string file) {
 }
 
 int main() {
-    string file = "nome-do-arquivo.txt";
+    string file = "../tests/teste_5_nos.txt";
     Grafo grafo = criarGrafo(file);
 
     //Inicializem as variáveis
-    int arvore[][];  // Lista contendo os vértices de origem de cada aresta na trilha.
-    string mensagem; // String que retorna algum erro no momento da criação da trilha.
-    int RA = -1;     // RA do aluno que deve ser preenchido na função que irá criar.
+    int *pi = new int[grafo.V]; // Lista contendo os vértices de origem de cada aresta na trilha.
+    int *dist = new int[grafo.V];
+    string mensagem = ""; // String que retorna algum erro no momento da criação da trilha.
+    int RA = 185447;     // RA do aluno que deve ser preenchido na função que irá criar.
 
-    bool tem_arvore = arvore_precedencia(grafo.V, grafo.M, grafo.W, grafo, &mensagem, RA, &arvore[0][0]);
+    bool tem_arvore = arvore_precedencia(grafo.V, grafo.M, grafo.W, grafo, mensagem, RA, pi, dist);
     if (RA == -1) {
-        cout << "Erro: RA informado eh invalido." << endl;
-    } else if (!tem_arvore) {
-        cout << mensagem << endl;
-    } else {
-        //Mostra a arvore de precedencia
-    }
+      cout << "Erro: RA informado eh invalido." << endl;
+      return 0;
+    } 
+    if (!tem_arvore) {
+      cout << mensagem << endl;
+      return 0;
+    } 
+
+    //Mostra a arvore de precedencia
 
     //Mostra o caminho minimo de cada vértice
 

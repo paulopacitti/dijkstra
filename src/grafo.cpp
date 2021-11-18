@@ -7,9 +7,9 @@ using namespace std;
 
 Grafo::Grafo(int V, int M, int W){
 	this->V = V; 
-    this->M = M;
+  this->M = M;
 	this->W = W;
-	adj = new list<pair<int, int> >[V]; 
+	adj = new list<pair<int, int>>[V]; 
 }
 
 // Criação da aresta (v1, v2) em G.
