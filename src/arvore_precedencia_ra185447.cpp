@@ -1,31 +1,61 @@
+#include<algorithm>
+#include <limits.h>
+#include <queue>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
-#include <queue>
-#include <limits.h>
 
 #include "grafo.hpp"
 #include "arvore_precedencia_ra185447.hpp"
 
+using namespace std;
+
 bool arvore_precedencia(int n, int m, int W, Grafo g, string &mensagem, int RA, int pred[], int dist[]) {
-  if (!check_degrees(g) || !is_strongly_connected(g) || check_weight(g, mensagem))
+  if (check_weight(g, mensagem))
     return false;
 
+  modified_dijkstra(0, g, pred, dist);
   return true;
 }
 
-bool modified_dijkstra(int s, Grafo g, int pred[], int dist[]){
-  vector<vector<int>> vertices_array(g.M*g.W);
-  priority_queue<int, vector<int>, greater<int>> next_index_heap;
+void modified_dijkstra(int s, Grafo g, int pi[], int dist[]){
+  vector<unordered_set<int>> vertices_array(g.V*g.W + 1);
+  vector<int> next_index_heap;
 
   // INITIALIZE-SINGLE-SOURCE
   for (int v = 0; v < g.V; v++) {
-    dist[v] = INT_MAX;
-    pred[v] = NULL;
+    dist[v] = INT_MAX; // infinite
+    pi[v] = NULL;
+    if(v != s)
+      vertices_array[g.V*g.W].insert(v); // insert all vertices with size infinite
   }
-  dist[s] = 0;
+  dist[s] = 0; // init "s" dist
+  vertices_array[0].insert(s);
+  next_index_heap.push_back(0);
+  next_index_heap.push_back(g.V*g.W);
 
+  for (int i = 0; i < g.V; i++) {
+    make_heap(next_index_heap.begin(), next_index_heap.end(), greater<int>()); // heapify
+    int j = next_index_heap.at(0);
+    int v = *(vertices_array[j].begin()); // get the first value of the set
+    vertices_array[j].erase(v);
+    
+    for (auto u : g.adj[v]) {
+      if (dist[u.first] > dist[v] + u.second) {
+        vertices_array[dist[u.first]].erase(u.first);
+        if (vertices_array[dist[u.first]].size() == 0)
+          next_index_heap.erase(find(next_index_heap.begin(), next_index_heap.end(), dist[u.first]));
+        dist[u.first] = dist[v] + u.second;
+        vertices_array[dist[u.first]].insert(u.first);
+        if(find(next_index_heap.begin(), next_index_heap.end(), dist[u.first]) != next_index_heap.end())
+          next_index_heap.push_back(dist[u.first]);
+        pi[u.first] = v;
+      }
+    }
+  }
 
+  return;
 }
 
 bool check_weight(Grafo g, string &mensagem){
