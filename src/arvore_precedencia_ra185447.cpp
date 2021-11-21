@@ -12,7 +12,7 @@
 using namespace std;
 
 bool arvore_precedencia(int n, int m, int W, Grafo g, string &mensagem, int RA, int pred[], int dist[]) {
-  if (check_weight(g, mensagem))
+  if (!check_weight(g, mensagem))
     return false;
 
   modified_dijkstra(0, g, pred, dist);
@@ -25,7 +25,7 @@ void modified_dijkstra(int s, Grafo g, int pi[], int dist[]){
 
   // INITIALIZE-SINGLE-SOURCE
   for (int v = 0; v < g.V; v++) {
-    dist[v] = INT_MAX; // infinite
+    dist[v] = g.V*g.W; // infinite
     pi[v] = NULL;
     if(v != s)
       vertices_array[g.V*g.W].insert(v); // insert all vertices with size infinite
@@ -40,7 +40,9 @@ void modified_dijkstra(int s, Grafo g, int pi[], int dist[]){
     int j = next_index_heap.at(0);
     int v = *(vertices_array[j].begin()); // get the first value of the set
     vertices_array[j].erase(v);
-    
+    if(vertices_array[j].size() == 0)
+      next_index_heap.erase(next_index_heap.begin());
+
     for (auto u : g.adj[v]) {
       if (dist[u.first] > dist[v] + u.second) {
         vertices_array[dist[u.first]].erase(u.first);
@@ -48,7 +50,7 @@ void modified_dijkstra(int s, Grafo g, int pi[], int dist[]){
           next_index_heap.erase(find(next_index_heap.begin(), next_index_heap.end(), dist[u.first]));
         dist[u.first] = dist[v] + u.second;
         vertices_array[dist[u.first]].insert(u.first);
-        if(find(next_index_heap.begin(), next_index_heap.end(), dist[u.first]) != next_index_heap.end())
+        if(find(next_index_heap.begin(), next_index_heap.end(), dist[u.first]) == next_index_heap.end())
           next_index_heap.push_back(dist[u.first]);
         pi[u.first] = v;
       }
