@@ -1,4 +1,5 @@
 #include<algorithm>
+#include <iostream>
 #include <limits.h>
 #include <queue>
 #include <string>
@@ -26,7 +27,7 @@ void modified_dijkstra(int s, Grafo g, int pi[], int dist[]){
   // INITIALIZE-SINGLE-SOURCE
   for (int v = 0; v < g.V; v++) {
     dist[v] = g.V*g.W; // infinite
-    pi[v] = NULL;
+    pi[v] = -1;
     if(v != s)
       vertices_array[g.V*g.W].insert(v); // insert all vertices with size infinite
   }
@@ -60,7 +61,7 @@ void modified_dijkstra(int s, Grafo g, int pi[], int dist[]){
   return;
 }
 
-bool check_weight(Grafo g, string &mensagem){
+bool check_weight(Grafo g, string &mensagem) {
   for (int v1 = 0; v1 < g.V; v1++)
     for (auto v2 : g.adj[v1]) {
       if(v2.second > g.W) {
@@ -69,6 +70,24 @@ bool check_weight(Grafo g, string &mensagem){
       }
     }
   return true;
+}
+
+void print_solution(int dist[], int V, int parent[]) {
+  int src = 0;
+  cout << "Origem -> Destino | Dist | Caminho" << endl;
+  for (int i = 1; i < V; i++) {
+      cout << src << " -> " << i << " | " << dist[i] << " | ";
+      print_path(parent, i);
+      cout << endl;
+  }
+}
+
+void print_path(int parent[], int i) {  
+  if(parent[i] == -1)
+    return;
+  
+  print_path(parent, parent[i]);
+  cout << i << " ";
 }
 
 bool is_strongly_connected(Grafo g) {

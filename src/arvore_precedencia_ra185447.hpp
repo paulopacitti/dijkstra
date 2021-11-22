@@ -6,6 +6,9 @@
 
 bool arvore_precedencia(int n, int m, int W, Grafo g, string &mensagem, int RA, int pred[], int dist[]);
 void modified_dijkstra(int s, Grafo g, int pi[], int dist[]);
+void print_solution(int dist[], int V, int parent[]);
+void print_path(int parent[], int i);
+
 bool check_weight(Grafo g, string &mensagem);
 
 bool is_strongly_connected(Grafo g);
