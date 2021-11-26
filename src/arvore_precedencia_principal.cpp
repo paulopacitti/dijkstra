@@ -4,6 +4,10 @@ arvore_precedencia_principal
 Arquio principal para a execução do segundo trabalho prático de MC558.
 Qualquer dúvida ou problema com o código, mandar um e-mail para:
 hismael.costa@gmail.com
+
+RA 185447
+Paulo Pacitti
+MC558 - TP II
 */
 
 #include <iostream>

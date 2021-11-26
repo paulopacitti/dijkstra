@@ -1,3 +1,9 @@
+/*
+  RA 185447
+  Paulo Pacitti
+  MC558 - TP II
+*/
+
 #include <algorithm>
 #include <limits.h>
 #include <set>

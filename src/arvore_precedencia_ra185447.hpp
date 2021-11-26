@@ -1,3 +1,9 @@
+/*
+  RA 185447
+  Paulo Pacitti
+  MC558 - TP II
+*/
+
 #ifndef arvore_precedencia_ra185447_HPP
 #define arvore_precedencia_ra185447_HPP
 
