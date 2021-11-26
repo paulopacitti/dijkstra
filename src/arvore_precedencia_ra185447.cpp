@@ -1,9 +1,7 @@
-#include<algorithm>
-#include <iostream>
+#include <algorithm>
 #include <limits.h>
-#include <queue>
 #include <string>
-#include <unordered_map>
+#include <typeinfo>
 #include <unordered_set>
 #include <vector>
 
@@ -13,7 +11,7 @@
 using namespace std;
 
 bool arvore_precedencia(int n, int m, int W, Grafo g, string &mensagem, int RA, int pred[], int dist[]) {
-  if (!check_weight(g, mensagem))
+  if (!check_max_weight(g, mensagem) || !check_int_weight(g, mensagem))
     return false;
 
   modified_dijkstra(0, g, pred, dist);
@@ -21,39 +19,42 @@ bool arvore_precedencia(int n, int m, int W, Grafo g, string &mensagem, int RA, 
 }
 
 void modified_dijkstra(int s, Grafo g, int pi[], int dist[]){
-  vector<unordered_set<int>> vertices_array(g.V*g.W + 1);
-  vector<int> next_index_heap;
+  vector<unordered_set<int>> vertices_array(g.V*g.W + 1); // vector where a vertex v is in index "i" if dist[v] = i
+  vector<int> next_index_heap; // min-heap indicating which is the min index of vertices_array that contains a vertex
 
   // INITIALIZE-SINGLE-SOURCE
   for (int v = 0; v < g.V; v++) {
-    dist[v] = g.V*g.W; // infinite
+    dist[v] = (g.V-1)*g.W; // the maximum distance possible in this case will be (g.V-1)*g.W (inifinite)
     pi[v] = -1;
     if(v != s)
-      vertices_array[g.V*g.W].insert(v); // insert all vertices with size infinite
+      vertices_array[(g.V-1)*g.W].insert(v); // insert all vertices with size infinite
   }
   dist[s] = 0; // init "s" dist
   vertices_array[0].insert(s);
   next_index_heap.push_back(0);
-  next_index_heap.push_back(g.V*g.W);
+  next_index_heap.push_back((g.V-1)*g.W); // indicates that there are vertices with "infinite" value
 
   for (int i = 0; i < g.V; i++) {
     make_heap(next_index_heap.begin(), next_index_heap.end(), greater<int>()); // heapify
-    int j = next_index_heap.at(0);
-    int v = *(vertices_array[j].begin()); // get the first value of the set
-    vertices_array[j].erase(v);
-    if(vertices_array[j].size() == 0)
+    int j = next_index_heap.at(0); // extract the vertice with min dist
+    int v = *(vertices_array[j].begin()); // get the first value of the set with min distance
+    vertices_array[j].erase(v); // remove from the set
+
+    if(vertices_array[j].size() == 0) // if there's not any more vertices in the set, remove from the min-heap
       next_index_heap.erase(next_index_heap.begin());
 
     for (auto u : g.adj[v]) {
-      if (dist[u.first] > dist[v] + u.second) {
-        vertices_array[dist[u.first]].erase(u.first);
-        if (vertices_array[dist[u.first]].size() == 0)
+      if (dist[u.first] > dist[v] + u.second) { // RELAX
+        vertices_array[dist[u.first]].erase(u.first); // remove from current position, because min distance from s will change
+        if (vertices_array[dist[u.first]].size() == 0) // if the set is empty, there's no more vertices to visit. Remove from heap.
           next_index_heap.erase(find(next_index_heap.begin(), next_index_heap.end(), dist[u.first]));
-        dist[u.first] = dist[v] + u.second;
-        vertices_array[dist[u.first]].insert(u.first);
-        if(find(next_index_heap.begin(), next_index_heap.end(), dist[u.first]) == next_index_heap.end())
-          next_index_heap.push_back(dist[u.first]);
-        pi[u.first] = v;
+        
+        dist[u.first] = dist[v] + u.second; // updates min-distance from s
+        vertices_array[dist[u.first]].insert(u.first); // inserts in the set of vertices with distance with value dist[v] + u.second
+
+        if(find(next_index_heap.begin(), next_index_heap.end(), dist[u.first]) == next_index_heap.end()) 
+          next_index_heap.push_back(dist[u.first]); // if the new position that u was put is not in the heap, add it to the heap
+        pi[u.first] = v; // u's parent is v
       }
     }
   }
@@ -61,10 +62,10 @@ void modified_dijkstra(int s, Grafo g, int pi[], int dist[]){
   return;
 }
 
-bool check_weight(Grafo g, string &mensagem) {
+bool check_max_weight(Grafo g, string &mensagem) {
   for (int v1 = 0; v1 < g.V; v1++)
     for (auto v2 : g.adj[v1]) {
-      if(v2.second > g.W) {
+      if(v2.second > g.W || v2.second < 0) {
         mensagem = "Erro: Existe peso fora do intervalo.";
         return false;
       }
@@ -72,90 +73,16 @@ bool check_weight(Grafo g, string &mensagem) {
   return true;
 }
 
-void print_solution(int dist[], int V, int parent[]) {
-  int src = 0;
-  cout << "Origem -> Destino | Dist | Caminho" << endl;
-  for (int i = 1; i < V; i++) {
-      cout << src << " -> " << i << " | " << dist[i] << " | ";
-      print_path(parent, i);
-      cout << endl;
-  }
-}
-
-void print_path(int parent[], int i) {  
-  if(parent[i] == -1)
-    return;
-  
-  print_path(parent, parent[i]);
-  cout << i << " ";
-}
-
-bool is_strongly_connected(Grafo g) {
-  vector<bool> visited;
-  visited.assign(g.V, false); // mark all the vertices as not visited
-
-  // find the first vertex with non-zero degree
-  int v;
-  for (v = 0; v < g.V; v++)
-    if (g.adj[v].size() > 0)
-      break;
-
-  dfs_visit(v, g, visited); // do DFS traversal
-
-  for (int i = 0; i < g.V; i++) // if DFS some vertex was not visited, it's not strongly connected
-    if (visited[i] == false)
-      return false;
-
-  Grafo g_transposed = get_transpose(g); // create a graph with reversed edges
-  visited.assign(g.V, false);
-
-  dfs_visit(v, g_transposed, visited); // starting Vertex must be same starting point of first DFS
-
-  for (int i = 0; i < g_transposed.V; i++) // if DFS some vertex was not visited, it's not strongly connected
-    if (visited[i] == false)
-      return false;
-
-  return true;
-}
-
-void dfs_visit(int v, Grafo g, vector<bool> &visited)
-{
-  visited[v] = true; // mark the current node as visited
-
-  for (auto e : g.adj[v]) // recursive
-    if (!visited[e.first])
-      dfs_visit(e.first, g, visited);
-}
-
-Grafo get_transpose(Grafo g) {
-  Grafo result(g.V, g.M, g.W); // create a new graph with same size
-
-  for (int v = 0; v < g.V; v++) // reverse edges
-    for (auto e : g.adj[v])
-      result.adj[e.first].push_back(make_pair(v, e.second));
-
-  return result;
-}
-
-bool check_degrees(Grafo g) {
-  unordered_map<int, int> degrees;
-
+// This method does not work because the routine that reads the input casts to integer. Graph implementation
+// would have to accept float values and the whole code would have to be changed to work iwht non-integer weights,
+// because C++ is statically typed language. Talknig to the PED, this verification will not be used.
+bool check_int_weight(Grafo g, string &mensagem) {
   for (int v1 = 0; v1 < g.V; v1++)
     for (auto v2 : g.adj[v1]) {
-      if (degrees.find(v1) != degrees.end())
-        degrees[v1] -= 1; // in-degree
-      else
-        degrees[v1] = -1; // out-degree
-
-      if (degrees.find(v2.first) != degrees.end())
-        degrees[v2.first] += 1; // in-degree
-      else
-        degrees[v2.first] = 1; // out-degree
+      if(typeid(v2.second) != typeid(1)) { // check if it's integer
+        mensagem = "Erro: Existe peso não inteiro.";
+        return false;
+      }
     }
-
-  for (auto p : degrees)
-    if (p.second != 0)
-      return false;
-
   return true;
 }

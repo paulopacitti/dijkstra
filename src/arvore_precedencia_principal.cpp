@@ -49,40 +49,30 @@ Grafo criarGrafo(string file) {
 }
 
 int main() {
-  string file = "../tests/teste_8_nos.txt";
-  Grafo grafo = criarGrafo(file);
+  string file = "../tests/teste_10_nos.txt";
+  Grafo graph = criarGrafo(file);
 
-  //Inicializem as variáveis
-  int *pi = new int[grafo.V]; // Lista contendo os vértices de origem de cada aresta na trilha.
-  int *dist = new int[grafo.V];
-  string mensagem = ""; // String que retorna algum erro no momento da criação da trilha.
-  int RA = 185447;     // RA do aluno que deve ser preenchido na função que irá criar.
+  int *pi = new int[graph.V]; // List containing the parent of each vertex in the shortest path from s
+  int *dist = new int[graph.V];
+  string message = ""; // error message
+  int RA = 185447;
 
-  bool tem_arvore = arvore_precedencia(grafo.V, grafo.M, grafo.W, grafo, mensagem, RA, pi, dist);
+  bool has_tree = arvore_precedencia(graph.V, graph.M, graph.W, graph, message, RA, pi, dist);
   if (RA == -1) {
     cout << "Erro: RA informado eh invalido." << endl;
     return 0;
   } 
-  if (!tem_arvore) {
-    cout << mensagem << endl;
+  if (!has_tree) {
+    cout << message << endl;
     return 0;
   } 
 
-  // Mostra a arvore de precedencia
-  cout << "Origem | Destino | Distancia de s para primeira aresta" <<  endl;
-  for(int i = 0; i < grafo.V; i++) {
-    for(auto e : grafo.adj[i]){
-      if(dist[e.first] == grafo.V*grafo.W)
-        cout << i << " " << e.first << " " << "INF" <<  endl;
-      else
-        cout << i << " " << e.first << " " << dist[e.first] <<  endl;
-    }
+  for(int i = 0; i < graph.V; i++) {
+    if(dist[i] == (graph.V-1)*graph.W)
+      cout << i << " INF" <<  endl;
+    else
+      cout << i << " " << dist[i] <<  endl;
   }
-  cout << endl;
-  print_solution(dist, grafo.V, pi);
-
-  
-  //Mostra o caminho minimo de cada vértice
 
   return 0;
 }

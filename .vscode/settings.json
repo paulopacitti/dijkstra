@@ -6,6 +6,15 @@
     "*.tcc": "cpp",
     "vector": "cpp",
     "unordered_map": "cpp",
-    "ostream": "cpp"
+    "ostream": "cpp",
+    "array": "cpp",
+    "compare": "cpp",
+    "functional": "cpp",
+    "istream": "cpp",
+    "ranges": "cpp",
+    "tuple": "cpp",
+    "type_traits": "cpp",
+    "utility": "cpp",
+    "unordered_set": "cpp"
   }
 }
