@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <limits.h>
+#include <set>
 #include <string>
 #include <typeinfo>
 #include <unordered_set>
@@ -20,7 +21,8 @@ bool arvore_precedencia(int n, int m, int W, Grafo g, string &mensagem, int RA, 
 
 void modified_dijkstra(int s, Grafo g, int pi[], int dist[]){
   vector<unordered_set<int>> vertices_array(g.V*g.W + 1); // vector where a vertex v is in index "i" if dist[v] = i
-  vector<int> next_index_heap; // min-heap indicating which is the min index of vertices_array that contains a vertex
+  set<int> next_index_tree; // C++ STL std::set is implemented using a red-black tree and is sorted.
+                            // Stores indices from vertices_array that contains a vertex
 
   // INITIALIZE-SINGLE-SOURCE
   for (int v = 0; v < g.V; v++) {
@@ -31,29 +33,26 @@ void modified_dijkstra(int s, Grafo g, int pi[], int dist[]){
   }
   dist[s] = 0; // init "s" dist
   vertices_array[0].insert(s);
-  next_index_heap.push_back(0);
-  next_index_heap.push_back((g.V-1)*g.W); // indicates that there are vertices with "infinite" value
+  next_index_tree.insert(0); // insert in the tree
+  next_index_tree.insert((g.V-1)*g.W); // indicates that there are vertices with "infinite" value
 
   for (int i = 0; i < g.V; i++) {
-    make_heap(next_index_heap.begin(), next_index_heap.end(), greater<int>()); // heapify
-    int j = next_index_heap.at(0); // extract the vertice with min dist
+    int j = *(next_index_tree.begin()); // because it's sorted, it extracts the min value (O(1))
     int v = *(vertices_array[j].begin()); // get the first value of the set with min distance
     vertices_array[j].erase(v); // remove from the set
 
     if(vertices_array[j].size() == 0) // if there's not any more vertices in the set, remove from the min-heap
-      next_index_heap.erase(next_index_heap.begin());
+      next_index_tree.erase(next_index_tree.begin());
 
     for (auto u : g.adj[v]) {
       if (dist[u.first] > dist[v] + u.second) { // RELAX
         vertices_array[dist[u.first]].erase(u.first); // remove from current position, because min distance from s will change
         if (vertices_array[dist[u.first]].size() == 0) // if the set is empty, there's no more vertices to visit. Remove from heap.
-          next_index_heap.erase(find(next_index_heap.begin(), next_index_heap.end(), dist[u.first]));
+          next_index_tree.erase(next_index_tree.find(dist[u.first])); // because it's a balanced tree, it takes O(log n)
         
         dist[u.first] = dist[v] + u.second; // updates min-distance from s
         vertices_array[dist[u.first]].insert(u.first); // inserts in the set of vertices with distance with value dist[v] + u.second
-
-        if(find(next_index_heap.begin(), next_index_heap.end(), dist[u.first]) == next_index_heap.end()) 
-          next_index_heap.push_back(dist[u.first]); // if the new position that u was put is not in the heap, add it to the heap
+        next_index_tree.insert(dist[u.first]); // if the new position that u was put is not in the heap, add it to the heap
         pi[u.first] = v; // u's parent is v
       }
     }

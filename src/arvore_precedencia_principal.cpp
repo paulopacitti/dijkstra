@@ -49,7 +49,7 @@ Grafo criarGrafo(string file) {
 }
 
 int main() {
-  string file = "../tests/teste_10_nos.txt";
+  string file = "../tests/teste_5_nos.txt";
   Grafo graph = criarGrafo(file);
 
   int *pi = new int[graph.V]; // List containing the parent of each vertex in the shortest path from s
